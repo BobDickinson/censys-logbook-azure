@@ -87,26 +87,16 @@ def activity_fn(state):
 
     # Get Logbook events from Censys ASM
     logbook = Logbook(censys_asm_api_key)
-
-    # !!! Both get_cursor and get_events make an underlying network request, which could fail.  It's not
-    #     clear how the Censys Python SDK intends for this to be detected or handled.  Exceptions should
-    #     fly out from the SDK, but it doesn't raise non-200 repsonses as exceptions, so it's not clear
-    #     what happens on something like a 403 (try again later) rate limit response (where the SDK would
-    #     eat that response, return no data, not throw an exception).  Is a None return the best we have
-    #     for indicating an error?
     events = None
     try:
         cursor = logbook.get_cursor(last_event_id, filters=["HOST"])
-        if (cursor != None):
-            events = logbook.get_events(cursor)
+        events = logbook.get_events(cursor)
     except Exception as e:
-        logging.error("Exception getting Logbook events: {}".format(e))
-
-    if events == None:
-        # This could be because no cursor was returned (error), no event set was returned (error), or an
-        # exception occured in one of the calls to the Censys API.  Let's trigger a retry.
-        logging.info("Is this an error state?")
+        # The Censys Python SDK can thrown many specific Censys expceptions, and it's possible that other
+        # exceptions could also be thrown.  We'll catch everything here and return state for retry.
+        #
         # !!! Update state for retry
+        logging.error("Exception getting Logbook events: {}".format(e))
         return state
 
     # Build the object to send to Azure Log Analytics
