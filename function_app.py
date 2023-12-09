@@ -38,7 +38,9 @@ async def startup_fn(mytimer: func.TimerRequest, client) -> None:
     logging.info("Starting orchestrator")
     initial_state = {
         "last_event_id": os.environ.get('CENSYS_LOGBOOK_LAST_EVENT_ID', 0), # Optional override
-        "more_events": True
+        "more_events": True,
+        "failed": False,
+        "retry_minutes": 0
         }
     await client.start_new('orchestrator_fn', uuid.uuid4(), initial_state)
 
@@ -50,16 +52,34 @@ def orchestrator_fn(context):
     state = context.get_input()
     logging.info("state: " + json.dumps(context.get_input()))
 
-    # If there are no more events to process, wait one hour
-    if not state['more_events']:
-        logging.info("No more events to process, waiting one hour")
-        one_hour = context.current_utc_datetime + timedelta(hours=1)
-        yield context.create_timer(one_hour)
+    max_interval_minutes = 60
+    if state['failed']:
+        # The previous call to activity_fn failed, so we'll compute a back-off interval, wait, and retry
+        if state['retry_minutes'] == 0:
+            state['retry_minutes'] = 1 # First retry is 1 minute
+            logging.info(f"Failure, first retry, waiting {state['retry_minutes']} minute")
+        else:
+            state['retry_minutes'] = state['retry_minutes'] * 2 # Double the retry interval each time
+            if state['retry_minutes'] > max_interval_minutes:
+                state['retry_minutes'] = max_interval_minutes
+                logging.info(f"Failure, waiting max interval of {state['retry_minutes']} minutes")
+            else:
+                logging.info(f"Failure, doubling retry and waiting {state['retry_minutes']} minutes")
+        backoff_interval = context.current_utc_datetime + timedelta(minutes=state['retry_minutes'])
+        yield context.create_timer(backoff_interval)    
+    elif not state['more_events']:
+        # Last call to activity_fn successed, but no more events to process, wait max interval
+        logging.info(f"No more events to process, waiting {max_interval_minutes} minutes")
+        next_interval = context.current_utc_datetime + timedelta(minutes=max_interval_minutes)
+        yield context.create_timer(next_interval)
 
     # Process more events
     logging.info("calling activity_fn")
+    state['failed'] = False
     state = yield context.call_activity("activity_fn", state)
-    logging.info("returned state {}".format(state))
+    if not state['failed']:
+        state['retry_minutes'] = 0 # Reset retry interval
+    logging.info("returned state {}".format(state))        
 
     # Post the state back to this orchestrator (we'll enter this function again, but with
     # no state other than the state we're setting here, allowing us to do this forever).
@@ -94,9 +114,8 @@ def activity_fn(state):
     except Exception as e:
         # The Censys Python SDK can thrown many specific Censys expceptions, and it's possible that other
         # exceptions could also be thrown.  We'll catch everything here and return state for retry.
-        #
-        # !!! Update state for retry
-        logging.error("Exception getting Logbook events: {}".format(e))
+        logging.error("Exception getting Censys Logbook events: {}".format(e))
+        state['failed'] = True
         return state
 
     # Build the object to send to Azure Log Analytics
@@ -126,10 +145,11 @@ def activity_fn(state):
         response = requests.post(request_params['url'], data=request_params['data'], headers=request_params['headers'])
         response.raise_for_status()  # Raises a HTTPError if the status is 4xx, 5xx
     except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
-        logging.error(f"Request failed: {e}")
-        # !!! Update state for retry
+        logging.error(f"Post to Azure Monitor failed: {e}")
+        state['failed'] = True
     else:
-        logging.info("Accepted: {}".format(response.status_code))
+        logging.info("Post to Azure Monitor accepted: {}".format(response.status_code))
+        state['failed'] = False
         state['last_event_id'] = last_event_id
         state['more_events'] = False # !!! more_events
 
