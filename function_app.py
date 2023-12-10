@@ -68,7 +68,7 @@ def orchestrator_fn(context):
         backoff_interval = context.current_utc_datetime + timedelta(minutes=state['retry_minutes'])
         yield context.create_timer(backoff_interval)    
     elif not state['more_events']:
-        # Last call to activity_fn successed, but no more events to process, wait max interval
+        # Last call to activity_fn succeeded, but no more events to process, wait max interval
         logging.info(f"No more events to process, waiting {max_interval_minutes} minutes")
         next_interval = context.current_utc_datetime + timedelta(minutes=max_interval_minutes)
         yield context.create_timer(next_interval)
@@ -91,7 +91,7 @@ def orchestrator_fn(context):
 def activity_fn(state):
     logging.info('Processing Logbook events, state {}'.format(state))
 
-    default_limit = 10 # !!! Increase to 500 production
+    default_limit = 500
     last_event_id = state['last_event_id']
 
     # Get environment variables
@@ -122,10 +122,9 @@ def activity_fn(state):
     more_events = False
     event_objects = [] 
     for event in events:
-        if len(event_objects) == limit:
+        if len(event_objects) >= limit:
             more_events = True
             break
-        logging.info(event)
         event_object = {
             "Event_ID": event['id'],
             "Event_type": event['type'],
@@ -137,21 +136,21 @@ def activity_fn(state):
         last_event_id = event['id']
 
     body = json.dumps(event_objects)
-    logging.info(body)
     request_params = build_request(workspace_id, shared_key, body, log_type)
 
     try:
         # Send the object to Azure Log Analytics
+        logging.info(f"Sending {len(event_objects)} events to Azure Monitor")
         response = requests.post(request_params['url'], data=request_params['data'], headers=request_params['headers'])
         response.raise_for_status()  # Raises a HTTPError if the status is 4xx, 5xx
     except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
         logging.error(f"Post to Azure Monitor failed: {e}")
         state['failed'] = True
     else:
-        logging.info("Post to Azure Monitor accepted: {}".format(response.status_code))
+        logging.info("Post to Azure Monitor succeded with code: {}, last event id posted: {}".format(response.status_code, last_event_id))
         state['failed'] = False
         state['last_event_id'] = last_event_id
-        state['more_events'] = False # !!! more_events
+        state['more_events'] = more_events
 
     return state
 
