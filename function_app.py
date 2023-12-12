@@ -1,12 +1,12 @@
-# Send Censys Logbook data to Azure Monitor using the Data Collector API using a Diurable Azure Function
+# An Azure Function to send Censys Logbook data to Azure Monitor based on a timer trigger
 
 # Azure Functions deps
 import logging
 import os
 import azure.functions as func
-import azure.durable_functions as df
 import uuid
 from datetime import datetime, timedelta
+from azure.core.exceptions import ResourceNotFoundError
 
 # Azure Monitor Data Collector deps (built-in)
 import json
@@ -19,122 +19,57 @@ import base64
 # Censys ASM deps
 from censys.asm import Logbook
 
-myApp = df.DFApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+# Azure KeyVault deps
+from azure.keyvault.secrets import SecretClient
+from azure.identity import DefaultAzureCredential
 
-# The orchestrator startup fn gets called once at startup in the lifetime of this long-running
-# Durable Azure Function, which implements the Eternal Orchestration pattern. 
-#
-# It determines the initial state to be passed in to the first execution of the orchestrator
-# function, then calls the orchestrator function with that state.
-#
-# I can't figure out how to make a "run once at startup" trigger any other way, so this is a timer
-# trigger that will not execute until Jan 1, 2030, and will needed to be triggered manually.
-#
-# Note: If you set run_on_startup=True, the orchestrator will be called very frequently in production,
-#       (it is advised not to set run_on_startup to True for this reason).  This can happen at scale
-#       out or whenever Azure feels like it (I witnessed it happening around once a minute).  So instead
-#       we set this to False, and trigger our initial (and only) launch of the orchestrator over its
-#       lifetime by going to the Azure console page for this functioning, selecting Code + Test, and
-#       invoking the function manually there.  In the ARM installer, we may see if there is a way to
-#       automate this by calling the test endpoint from script as described here: 
-#
-#       https://learn.microsoft.com/en-us/azure/azure-functions/functions-manually-run-non-http?tabs=azure-portal
-#
-@myApp.schedule(schedule="0 0 0 1 Jan Tue", arg_name="mytimer", run_on_startup=False) # Jan 1, 2030
-@myApp.durable_client_input(client_name="client")
-async def startup_fn(mytimer: func.TimerRequest, client) -> None:
-    # start the orchestrator
-    logging.info("Starting orchestrator")
-    # !!! Implement singleton pattern in case this gets called more than once (for example, manually)
-    initial_state = {
-        "last_event_id": os.environ.get('CENSYS_LOGBOOK_LAST_EVENT_ID', 0), # Optional override
-        "more_events": True,
-        "failed": False,
-        "retry_minutes": 0
-        }
-    await client.start_new('orchestrator_fn', uuid.uuid4(), initial_state)
+app = func.FunctionApp()
 
+@app.function_name(name="CensysLogbookSync")
+@app.schedule(schedule="%CENSYS_LOGBOOK_SYNC_INTERVAL%", arg_name="mytimer", run_on_startup=False) 
+def censys_logbook_sync(mytimer: func.TimerRequest) -> None:
 
-# Orchestrator
-@myApp.orchestration_trigger(context_name="context")
-def orchestrator_fn(context):
-    # do the orchestration
-    state = context.get_input()
-    logging.info("state: " + json.dumps(context.get_input()))
+    client = get_keyvault_client_quiet()
 
-    max_interval_minutes = 60
-    if state['failed']:
-        # The previous call to activity_fn failed, so we'll compute a back-off interval, wait, and retry
-        if state['retry_minutes'] == 0:
-            state['retry_minutes'] = 1 # First retry is 1 minute
-            logging.info(f"Failure, first retry, waiting {state['retry_minutes']} minute")
-        else:
-            state['retry_minutes'] = state['retry_minutes'] * 2 # Double the retry interval each time
-            if state['retry_minutes'] > max_interval_minutes:
-                state['retry_minutes'] = max_interval_minutes
-                logging.info(f"Failure, waiting max interval of {state['retry_minutes']} minutes")
-            else:
-                logging.info(f"Failure, doubling retry and waiting {state['retry_minutes']} minutes")
-        backoff_interval = context.current_utc_datetime + timedelta(minutes=state['retry_minutes'])
-        yield context.create_timer(backoff_interval)    
-    elif not state['more_events']:
-        # Last call to activity_fn succeeded, but no more events to process, wait max interval
-        logging.info(f"No more events to process, waiting {max_interval_minutes} minutes")
-        next_interval = context.current_utc_datetime + timedelta(minutes=max_interval_minutes)
-        yield context.create_timer(next_interval)
-
-    # Process more events
-    logging.info("calling activity_fn")
-    state['failed'] = False
-    state = yield context.call_activity("activity_fn", state)
-    if not state['failed']:
-        state['retry_minutes'] = 0 # Reset retry interval
-    logging.info("returned state {}".format(state))        
-
-    # Post the state back to this orchestrator (we'll enter this function again, but with
-    # no state other than the state we're setting here, allowing us to do this forever).
-    context.continue_as_new(state)
-
-
-# Activity
-@myApp.activity_trigger(input_name="state")
-def activity_fn(state):
-    logging.info('Processing Logbook events, state {}'.format(state))
-
-    default_limit = 500
-    last_event_id = state['last_event_id']
-
+    next_event_raw_value = get_secret_quiet(client, 'CENSYS-LOGBOOK-NEXT-EVENT', 1)
+    next_event_id = None
+    try:
+        next_event_id = int(next_event_raw_value)
+    except ValueError:
+        # If not int, then it's a string we'll use as a date filter
+        next_event_id = next_event_raw_value
+    logging.info('Processing Logbook events, starting with {}'.format(next_event_id))
+               
     # Get environment variables
     censys_asm_api_key = os.environ.get('CENSYS_ASM_API_KEY')
     workspace_id = os.environ.get('AZURE_LOG_ANALYTICS_WORKSPACE_ID')
     shared_key = os.environ.get('AZURE_LOG_ANALYTICS_SHARED_KEY')
-    log_type = os.environ.get('AZURE_LOG_ANALYTICS_LOG_TYPE', 'Censys_Logbook_CL')
+    log_type = os.environ.get('AZURE_LOG_ANALYTICS_LOG_TYPE_CENSYS_LOGBOOK', 'Censys_Logbook_CL')
+
+    default_limit = 500
     try:
-        limit = int(os.environ.get('CENSYS_LOGBOOK_LIMIT', default_limit))
+        limit = int(os.environ.get('AZURE_EVENT_POST_LIMIT', default_limit))
     except ValueError:
-        logging.error("Invalid value for CENSYS_LOGBOOK_LIMIT. Using default value of {}.".format(default_limit))
+        logging.error("Invalid value for AZURE_EVENT_POST_LIMIT. Using default value of {}.".format(default_limit))
         limit = default_limit
 
     # Get Logbook events from Censys ASM
     logbook = Logbook(censys_asm_api_key)
+
     events = None
     try:
-        cursor = logbook.get_cursor(last_event_id, filters=["HOST"])
+        cursor = logbook.get_cursor(next_event_id, filters=["HOST"])
         events = logbook.get_events(cursor)
     except Exception as e:
         # The Censys Python SDK can thrown many specific Censys expceptions, and it's possible that other
         # exceptions could also be thrown.  We'll catch everything here and return state for retry.
         logging.error("Exception getting Censys Logbook events: {}".format(e))
-        state['failed'] = True
-        return state
+        return
 
     # Build the object to send to Azure Log Analytics
-    more_events = False
     event_objects = [] 
+    total_count = 0
     for event in events:
-        if len(event_objects) >= limit:
-            more_events = True
-            break
         event_object = {
             "Event_ID": event['id'],
             "Event_type": event['type'],
@@ -143,26 +78,83 @@ def activity_fn(state):
             "timestamp": event['timestamp']
         }
         event_objects.append(event_object)
-        last_event_id = event['id']
+        next_event_id = event['id'] + 1
 
-    body = json.dumps(event_objects)
+        if len(event_objects) >= limit:
+            if send_events_to_azure_monitor(event_objects, workspace_id, shared_key, log_type):
+                total_count += len(event_objects)
+                event_objects = []
+                # Serialize next_event_id to KeyVault (sucessfully posted to Azure Monitor)
+                set_secret_quiet(client, 'CENSYS-LOGBOOK-NEXT-EVENT', next_event_id)
+            else:
+                return False
+            
+    if event_objects:
+        if send_events_to_azure_monitor(event_objects, workspace_id, shared_key, log_type):
+            total_count += len(event_objects)
+            # Serialize next_event_id to KeyVault (sucessfully posted to Azure Monitor)
+            set_secret_quiet(client, 'CENSYS-LOGBOOK-NEXT-EVENT', next_event_id)
+        else:
+            return False
+
+    logging.info('Processed {} Logbook events, next event will be logbook ID: {}'.format(total_count, next_event_id))
+    return
+
+
+def get_keyvault_client_quiet():
+    keyVaultName = os.environ.get("KEYVAULT_NAME")
+    KVUri = f"https://{keyVaultName}.vault.azure.net"
+
+    azure_logger = logging.getLogger('azure')
+    azure_logger.setLevel(logging.WARNING)
+
+    credential = DefaultAzureCredential()
+    client = SecretClient(vault_url=KVUri, credential=credential)
+
+    azure_logger.setLevel(logging.INFO)
+
+    return client
+
+
+def get_secret_quiet(client, key, default_value=None):
+    azure_logger = logging.getLogger('azure')
+    azure_logger.setLevel(logging.WARNING)
+
+    retval = default_value
+    try:
+        retval_raw = client.get_secret(key)
+        retval = retval_raw.value
+    except ResourceNotFoundError:
+        pass
+
+    azure_logger.setLevel(logging.INFO)
+
+    return retval
+
+
+def set_secret_quiet(client, key, value):
+    azure_logger = logging.getLogger('azure')
+    azure_logger.setLevel(logging.WARNING)
+
+    client.set_secret(key, value)
+
+    azure_logger.setLevel(logging.INFO)
+
+
+def send_events_to_azure_monitor(events, workspace_id, shared_key, log_type):
+    body = json.dumps(events)
     request_params = build_request(workspace_id, shared_key, body, log_type)
 
     try:
         # Send the object to Azure Log Analytics
-        logging.info(f"Sending {len(event_objects)} events to Azure Monitor")
+        logging.info(f"Sending {len(events)} events to Azure Monitor, next batch will start at logbook ID: {events[len(events)-1]['Event_ID']+1}")
         response = requests.post(request_params['url'], data=request_params['data'], headers=request_params['headers'])
         response.raise_for_status()  # Raises a HTTPError if the status is 4xx, 5xx
     except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
         logging.error(f"Post to Azure Monitor failed: {e}")
-        state['failed'] = True
-    else:
-        logging.info("Post to Azure Monitor succeded with code: {}, last event id posted: {}".format(response.status_code, last_event_id))
-        state['failed'] = False
-        state['last_event_id'] = last_event_id
-        state['more_events'] = more_events
-
-    return state
+        return False
+    
+    return True
 
 
 # Build the API signature for the Azure Log Analytics Data Collector
