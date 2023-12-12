@@ -28,14 +28,24 @@ myApp = df.DFApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 # function, then calls the orchestrator function with that state.
 #
 # I can't figure out how to make a "run once at startup" trigger any other way, so this is a timer
-# trigger that will not execute until Jan 1, 2030 (so it should execute at startup only).  There
-# should be a better way to do this, but I can't find it.
+# trigger that will not execute until Jan 1, 2030, and will needed to be triggered manually.
 #
-@myApp.schedule(schedule="0 0 0 1 Jan Tue", arg_name="mytimer", run_on_startup=True) # Jan 1, 2030
+# Note: If you set run_on_startup=True, the orchestrator will be called very frequently in production,
+#       (it is advised not to set run_on_startup to True for this reason).  This can happen at scale
+#       out or whenever Azure feels like it (I witnessed it happening around once a minute).  So instead
+#       we set this to False, and trigger our initial (and only) launch of the orchestrator over its
+#       lifetime by going to the Azure console page for this functioning, selecting Code + Test, and
+#       invoking the function manually there.  In the ARM installer, we may see if there is a way to
+#       automate this by calling the test endpoint from script as described here: 
+#
+#       https://learn.microsoft.com/en-us/azure/azure-functions/functions-manually-run-non-http?tabs=azure-portal
+#
+@myApp.schedule(schedule="0 0 0 1 Jan Tue", arg_name="mytimer", run_on_startup=False) # Jan 1, 2030
 @myApp.durable_client_input(client_name="client")
 async def startup_fn(mytimer: func.TimerRequest, client) -> None:
     # start the orchestrator
     logging.info("Starting orchestrator")
+    # !!! Implement singleton pattern in case this gets called more than once (for example, manually)
     initial_state = {
         "last_event_id": os.environ.get('CENSYS_LOGBOOK_LAST_EVENT_ID', 0), # Optional override
         "more_events": True,
