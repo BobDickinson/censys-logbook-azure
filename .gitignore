@@ -10,7 +10,6 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -133,3 +132,5 @@ __blobstorage__
 __queuestorage__
 __azurite_db*__.json
 .python_packages
+
+wiz-azuredeploy.json

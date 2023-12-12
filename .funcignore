@@ -3,6 +3,11 @@
 __azurite_db*__.json
 __blobstorage__
 __queuestorage__
+__pycache__
+azuredeploy.json
 local.settings.json
 test
 .venv
+.DS_Store
+dist
+pack.sh
