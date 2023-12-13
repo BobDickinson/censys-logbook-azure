@@ -4,7 +4,6 @@ import os
 import uuid
 from datetime import datetime, timedelta
 import azure.functions as func
-from azure.core.exceptions import ResourceNotFoundError
 
 # Azure Monitor Data Collector deps (built-in)
 import json
