@@ -14,9 +14,6 @@ import hashlib
 import hmac
 import base64
 
-# Censys ASM deps
-from censys.asm import Logbook
-
 app = func.FunctionApp()
 
 @app.function_name(name="CensysLogbookSync")
