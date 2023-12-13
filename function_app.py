@@ -1,16 +1,15 @@
 # Azure Functions deps
+from datetime import datetime, timedelta
 import logging
 import os
 import uuid
-from datetime import datetime, timedelta
-import azure.functions as func
-
-# Azure Monitor Data Collector deps (built-in)
 import json
-#import requests
 import hashlib
 import hmac
 import base64
+import azure.functions as func
+
+import requests
 
 app = func.FunctionApp()
 
