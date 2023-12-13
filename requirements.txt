@@ -1,1 +1,3 @@
+azure-core
 azure-functions
+censys==2.2.9

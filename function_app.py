@@ -1,6 +1,21 @@
 # Azure Functions deps
 import logging
+import os
+import uuid
+from datetime import datetime, timedelta
 import azure.functions as func
+from azure.core.exceptions import ResourceNotFoundError
+
+# Azure Monitor Data Collector deps (built-in)
+import json
+import requests
+import datetime
+import hashlib
+import hmac
+import base64
+
+# Censys ASM deps
+from censys.asm import Logbook
 
 app = func.FunctionApp()
 
