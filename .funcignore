@@ -5,9 +5,11 @@ __blobstorage__
 __queuestorage__
 __pycache__
 azuredeploy.json
-local.settings.json
+local.settings.json*
 test
 .venv
 .DS_Store
 dist
 pack.sh
+.funcignore
+scratch

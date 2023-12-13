@@ -14,6 +14,7 @@ mkdir -p ./dist
 
 # Use zip to create a zip file in the dist directory from the temporary directory
 cd $tmpdir
+rm -f $OLDPWD/dist/censys-sentinel.zip
 zip -r $OLDPWD/dist/censys-sentinel.zip .
 
 # Remove the temporary directory

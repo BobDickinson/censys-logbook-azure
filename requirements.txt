@@ -5,7 +5,6 @@ attrs==23.1.0
 azure-common==1.1.28
 azure-core==1.29.5
 azure-functions==1.17.0
-azure-functions-durable==1.2.8
 azure-identity==1.15.0
 azure-keyvault-secrets==4.7.0
 backoff==2.2.1

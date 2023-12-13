@@ -6,6 +6,10 @@ This integration polls the Censys Logbook for new events and injects them into A
 
 [Azure Monitor Data Collector API](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/data-collector-api?tabs=powershell)
 
+[Azure Functions Python Developers Guide](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=asgi%2Capplication-level&pivots=python-mode-decorators)
+
+[Quickstart: Create a function in Azure with Python using Visual Studio Code](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-python?pivots=python-mode-decorators)
+
 [Timer Triggers for Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-timer?tabs=python-v2%2Cisolated-process%2Cnodejs-v4&pivots=programming-language-python)
 
 ## Community-Supported Integrations
@@ -48,7 +52,7 @@ In production, these environment variables will usually be populated from a Key 
 
 The Azure fuction relies on an Azure Key Vault for access to a Secret called "CENSYS-LOGBOOK-NEXT-EVENT". This is how we track the Censys cursor value between function runs (so we can pick up where we left off on subsequent runs).  While all other configuration variables may be accessed from the Key Vault indirectly (via redirected environment vars), this one value will be accessed directly from the Key Vault (since it is both read and written to).  The Azure Key Vault name must be provided to the function via the KEYVAULT_NAME environment variable, and both your development environment (if desired) and Function App must have read and update privileges on Secrets in that Key Vault.
 
-For the Azure Log Analytics Workspace ID and Shared Key, in the Azure consule go to Log Analytics Workspaces, select a workspace, select 'Agents', then click 'Log Analytics agent instructions'.  For the shared key, you may use either the primary or secondary key.
+For the Azure Log Analytics Workspace ID and Shared Key, in the Azure console go to Log Analytics Workspaces, select a workspace, select 'Agents', then click 'Log Analytics agent instructions'.  For the shared key, you may use either the primary or secondary key.
 
 | Name | Required | Description |
 | ---- | -------- | ----------- |

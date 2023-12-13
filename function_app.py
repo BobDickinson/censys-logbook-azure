@@ -101,6 +101,13 @@ def censys_logbook_sync(mytimer: func.TimerRequest) -> None:
     return
 
 
+@app.function_name(name="CensysRisksSync")
+@app.schedule(schedule="0 0 * * * *", arg_name="mytimer", run_on_startup=False) 
+def censys_risks_sync(mytimer: func.TimerRequest) -> None:
+
+    logging.info("Not implemented yet")
+
+
 def get_keyvault_client_quiet():
     keyVaultName = os.environ.get("KEYVAULT_NAME")
     KVUri = f"https://{keyVaultName}.vault.azure.net"
