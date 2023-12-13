@@ -8,7 +8,7 @@ import azure.functions as func
 # Azure Monitor Data Collector deps (built-in)
 import json
 import requests
-import hashlib
+#import hashlib
 #import hmac
 #import base64
 
