@@ -26,7 +26,8 @@ from azure.identity import DefaultAzureCredential
 app = func.FunctionApp()
 
 @app.function_name(name="CensysLogbookSync")
-@app.schedule(schedule="%CENSYS_LOGBOOK_SYNC_INTERVAL%", arg_name="mytimer", run_on_startup=False) 
+#@app.schedule(schedule="%CENSYS_LOGBOOK_SYNC_INTERVAL%", arg_name="mytimer", run_on_startup=False) 
+@app.schedule(schedule="0 0 * * * *", arg_name="mytimer", run_on_startup=False) 
 def censys_logbook_sync(mytimer: func.TimerRequest) -> None:
 
     client = get_keyvault_client_quiet()

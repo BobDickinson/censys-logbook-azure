@@ -18,7 +18,6 @@ pip install  --target="$tmpdir/.python_packages/lib/site-packages" -r requiremen
 chmod -R u+rwX "$tmpdir/.python_packages"
 
 deactivate
-rm -rf ./env
 
 # Create the dist directory if it doesn't exist
 mkdir -p ./dist
@@ -26,8 +25,9 @@ mkdir -p ./dist
 # Use zip to create a zip file in the dist directory from the temporary directory
 cd $tmpdir
 rm -f $OLDPWD/dist/censys-sentinel.zip
-zip -r $OLDPWD/dist/censys-sentinel.zip . -x "*.DS_Store" > /dev/null
+zip -r $OLDPWD/dist/censys-sentinel.zip . -x "*.DS_Store" -x "env/*" > /dev/null
 
 # Remove the temporary directory
 cd ..
 rm -rf $tmpdir
+rm -rf ./env
