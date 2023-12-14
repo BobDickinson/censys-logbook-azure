@@ -11,7 +11,7 @@ import base64
 import uuid
 
 # General deps
-import requests
+#import requests
 
 '''
 # Azure Functions deps
