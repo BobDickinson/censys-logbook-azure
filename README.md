@@ -10,7 +10,7 @@ The Censys connector allows you to easily send Censys Logbook and Risk events to
 
 ## Query samples
 
-**Summary Logbook events by operation**
+**Summary of Logbook events by operation**
    ```kusto
 CensysLogbook_CL            
    | summarize Count=count() by Operation_s
@@ -47,6 +47,9 @@ Option 1: Deploy using the Azure Resource Manager (ARM) Template
   The final piece of the path for the Deploy to Azure link is the URL to the azuredeploy.json file (URL encoded).
   The link below points to the raw tip of that file in this repo.  This will need to be changed when the repo moves,
   and you may want to point it to a more stable version of the file to support periodic releases of a stable template.
+
+  The officialy support integrations hide this URL complexity behind a shortened (and branded) aka.ms link, like:
+  https://aka.ms/censys-sentinel (Microsoft should be able to provide guidance on that once we're in their developer program).
 -->
 [![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FBobDickinson%2Fcensys-logbook-azure%2Fmain%2Fazuredeploy.json) 
 
