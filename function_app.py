@@ -32,7 +32,9 @@ import cryptography
 # One of these three is the culprit?
 import portalocker
 import pycparser
-#import jwt
+import msal_extensions
+#import msal <- Required by azure-identity
+#import jwt <-- This is a culprit - required by msal
 
 # Censys ASM deps
 from censys.asm import Logbook
