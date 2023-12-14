@@ -37,6 +37,7 @@
 # Create a temporary directory
 tmpdir=$(mktemp -d -t ci-XXXXXXXXXX)
 
+# Expand the squashfs file into the temporary directory
 unsquashfs -d $tmpdir $1
 
 # Create the dist directory if it doesn't exist
@@ -47,6 +48,6 @@ cd $tmpdir
 rm -f $OLDPWD/dist/censys-sentinel.zip
 zip -r $OLDPWD/dist/censys-sentinel.zip . -x "*.DS_Store" -x "env/*" -x "oryx*" > /dev/null
 
-# Remove the temporary directory and the Python env directory
+# Remove the temporary directory
 cd ..
 rm -rf $tmpdir
