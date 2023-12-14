@@ -31,7 +31,7 @@ import cryptography
 
 # One of these three is the culprit?
 import portalocker
-#import pycparser
+import pycparser
 #import jwt
 
 # Censys ASM deps
