@@ -11,11 +11,12 @@ import base64
 import uuid
 
 # General deps
-#import requests
+import requests
 
-'''
 # Azure Functions deps
 import azure.functions as func
+
+'''
 from azure.core.exceptions import ResourceNotFoundError
 
 # Azure KeyVault deps
