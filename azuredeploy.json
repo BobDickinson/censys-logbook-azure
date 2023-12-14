@@ -75,7 +75,8 @@
                             "keys": [],
                             "secrets": [
                                 "Get",
-                                "List"
+                                "List",
+                                "Set"
                             ]
                         }
                     }

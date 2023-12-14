@@ -1,4 +1,4 @@
-# Censys Logbook Integration with Azure Monitor (for Developers)
+# Censys Logbook Integration with Azure Monitor - For Developers
 
 This integration polls the Censys Logbook for new events and injects them into Azure Monitor via the Azure Monitor Data Collector HTTP endpoint. It is implemented as an Azure Function with a timer trigger. It is implemented in Python and uses the Censys Python SDK as well as Azure Python libraries.  For more details, see:
 
@@ -14,17 +14,6 @@ This integration polls the Censys Logbook for new events and injects them into A
 
 ## Community-Supported Integrations
 This is a community-supported integration. Please note that while these integrations are designed to enhance your experience with Censys products, they are not officially supported by Censys.
-
-## Deploy
-
-<!-- 
-  Deploy to Azure button
-  ======================
-  The final piece of the path for the Deploy to Azure link is the URL to the azuredeploy.json file (URL encoded).
-  The link below points to the raw tip of that file in this repo.  This will need to be changed when the repo moves,
-  and you may want to point it to a more stable version of the file to support periodic releases of a stable template.
--->
-[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FBobDickinson%2Fcensys-logbook-azure%2Fmain%2Fazuredeploy.json) 
 
 ## Getting Started
 To use this integration, follow these general steps:
@@ -47,7 +36,7 @@ To use this integration, follow these general steps:
 
 8. Start Azurite services from VS Code command palette: "Azurite: Start"
 
-9. Run or debug the function in VS Code.  Note that this will obey the timer schedule configuration value.  For testing you may change the run_on_startup param to True in the app.schedule decorator (do NOT deploy to Azure with this set to True - it will run the function very frequently - on the order of once a minute - as the Azure internal state is shuffled around).
+9. Run or debug the function in VS Code.  Note that this will obey the timer schedule configuration value.  For testing you may change the `run_on_startup` param to `True` in the app.schedule decorator (do NOT deploy to Azure with this set to True - it will run the function very frequently - on the order of once a minute - as the Azure internal state is shuffled around).
 
 ### Deploying to Azure
 
@@ -59,7 +48,7 @@ To use this integration, follow these general steps:
 
 This integration is configured using environment variables. For local development these can be set in `local.settings.json`. For deployment to Azure these will be set in the Azure Function App "Configuration" values.
   
-In production, these environment variables will usually be populated from a Key Vault using an environment/configuration value formatted like: `"@Microsoft.KeyVault(SecretUri=https://[YourKeyVaultName].vault.azure.net/secrets/[NameOfSecretInVault])"` (without the square brackets).
+In production, some of these environment variables will be populated from a Key Vault using an environment/configuration value formatted like: `"@Microsoft.KeyVault(SecretUri=https://[YourKeyVaultName].vault.azure.net/secrets/[NameOfSecretInVault])"` (without the square brackets).
 
 The Azure fuction relies on an Azure Key Vault for access to a Secret called "CENSYS-LOGBOOK-NEXT-EVENT". This is how we track the Censys cursor value between function runs (so we can pick up where we left off on subsequent runs).  While all other configuration variables may be accessed from the Key Vault indirectly (via redirected environment vars), this one value will be accessed directly from the Key Vault (since it is both read and written to).  The Azure Key Vault name must be provided to the function via the KEYVAULT_NAME environment variable, and both your development environment (if desired) and Function App must have read and update privileges on Secrets in that Key Vault.
 

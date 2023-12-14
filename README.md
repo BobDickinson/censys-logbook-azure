@@ -10,7 +10,7 @@ The Censys connector allows you to easily send Censys Logbook and Risk events to
 
 ## Query samples
 
-**Summary by Issues's severity**
+**Summary Logbook events by operation**
    ```kusto
 CensysLogbook_CL            
    | summarize Count=count() by Operation_s
@@ -25,8 +25,7 @@ To integrate with Censys make sure you have:
 ## Vendor installation instructions
 
 > [!NOTE]
-   >  This connector: Uses Azure Functions to connect to Censys ASM APIs to pull Logbook and Risk events into Microsoft Sentinel. This might result in additional data ingestion costs. Check the [Azure Functions pricing page](https://azure.microsoft.com/pricing/details/functions/) for details.
-Creates an Azure Key Vault with all the required parameters stored as secrets.
+   >  This connector: Uses Azure Functions to connect to Censys ASM APIs to pull Logbook and Risk events into Microsoft Sentinel. This might result in additional data ingestion costs. Check the [Azure Functions pricing page](https://azure.microsoft.com/pricing/details/functions/) for details.  This connector also requires an Azure Key Vault to store the required parameters stored as secrets (will be created automatically by the ARM template when using the "Deploy to Azure" button option below).
 
 STEP 1 - Get your Censys credentials
 
