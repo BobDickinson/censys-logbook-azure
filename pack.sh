@@ -14,9 +14,6 @@ source env/bin/activate
 
 pip install  --target="$tmpdir/.python_packages/lib/site-packages" -r requirements.txt
 
-# Change permissions of the installed packages
-chmod -R u+rwX "$tmpdir/.python_packages"
-
 deactivate
 
 # Create the dist directory if it doesn't exist
@@ -27,7 +24,7 @@ cd $tmpdir
 rm -f $OLDPWD/dist/censys-sentinel.zip
 zip -r $OLDPWD/dist/censys-sentinel.zip . -x "*.DS_Store" -x "env/*" > /dev/null
 
-# Remove the temporary directory
+# Remove the temporary directory and the Python env directory
 cd ..
 rm -rf $tmpdir
 rm -rf ./env
