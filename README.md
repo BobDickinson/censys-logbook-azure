@@ -15,6 +15,10 @@ This integration polls the Censys Logbook for new events and injects them into A
 ## Community-Supported Integrations
 This is a community-supported integration. Please note that while these integrations are designed to enhance your experience with Censys products, they are not officially supported by Censys.
 
+## Deploy
+
+[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FBobDickinson%2Fcensys-logbook-azure%2Fmain%2Fazuredeploy.json) 
+
 ## Getting Started
 To use this integration, follow these general steps:
 
