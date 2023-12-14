@@ -5,12 +5,15 @@ from datetime import datetime, timedelta
 import logging
 import os
 import json
-import requests
 import hashlib
 import hmac
 import base64
 import uuid
 
+# General deps
+import requests
+
+'''
 # Azure Functions deps
 import azure.functions as func
 from azure.core.exceptions import ResourceNotFoundError
@@ -21,6 +24,7 @@ from azure.identity import DefaultAzureCredential
 
 # Censys ASM deps
 from censys.asm import Logbook
+'''
 
 app = func.FunctionApp()
 
