@@ -21,12 +21,17 @@ from azure.core.exceptions import ResourceNotFoundError
 from azure.keyvault.secrets import SecretClient
 
 #from azure.identity import DefaultAzureCredential <- This kills us
+
 # These are the deps that Azure identity pulls in - see if anyone is the culprit
+
+# These worked
 import azure.core
 import cffi
 import cryptography
-import portalocker
-#import pycparser
+
+# One of these three is the culprit?
+#import portalocker
+import pycparser
 import jwt
 
 # Censys ASM deps
