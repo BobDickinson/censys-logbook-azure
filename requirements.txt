@@ -1,3 +1,2 @@
 azure-functions
 censys>=2.2.9
-requests>=2.31.0
