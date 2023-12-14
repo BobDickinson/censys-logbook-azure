@@ -30,9 +30,9 @@ import cffi
 import cryptography
 
 # One of these three is the culprit?
-#import portalocker
-import pycparser
-import jwt
+import portalocker
+#import pycparser
+#import jwt
 
 # Censys ASM deps
 from censys.asm import Logbook
