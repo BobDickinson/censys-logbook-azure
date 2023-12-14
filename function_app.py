@@ -17,14 +17,14 @@ import requests
 import azure.functions as func
 from azure.core.exceptions import ResourceNotFoundError
 
+'''
 # Azure KeyVault deps
 from azure.keyvault.secrets import SecretClient
 from azure.identity import DefaultAzureCredential
-
 '''
+
 # Censys ASM deps
 from censys.asm import Logbook
-'''
 
 app = func.FunctionApp()
 
