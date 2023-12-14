@@ -19,7 +19,7 @@ from azure.core.exceptions import ResourceNotFoundError
 
 # Azure KeyVault deps
 from azure.keyvault.secrets import SecretClient
-from azure.identity import DefaultAzureCredential <- This kills us
+from azure.identity import DefaultAzureCredential
 
 # Censys ASM deps
 from censys.asm import Logbook
@@ -194,4 +194,3 @@ def build_request(workspace_id, shared_key, body, log_type):
     }
 
     return {"url": url, "headers": headers, "data": body}
-    
