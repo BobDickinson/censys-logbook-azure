@@ -1,35 +1,33 @@
 # An Azure Function to send Censys Logbook data to Azure Monitor based on a timer trigger
 
-# Azure Functions deps
+# built-ins
+from datetime import datetime, timedelta
 import logging
 import os
-import azure.functions as func
-import uuid
-from datetime import datetime, timedelta
-from azure.core.exceptions import ResourceNotFoundError
-
-# Azure Monitor Data Collector deps (built-in)
 import json
 import requests
-import datetime
 import hashlib
 import hmac
 import base64
+import uuid
 
-# Censys ASM deps
-from censys.asm import Logbook
+# Azure Functions deps
+import azure.functions as func
+from azure.core.exceptions import ResourceNotFoundError
 
 # Azure KeyVault deps
 from azure.keyvault.secrets import SecretClient
 from azure.identity import DefaultAzureCredential
 
+# Censys ASM deps
+from censys.asm import Logbook
+
 app = func.FunctionApp()
 
 @app.function_name(name="CensysLogbookSync")
-#@app.schedule(schedule="%CENSYS_LOGBOOK_SYNC_INTERVAL%", arg_name="mytimer", run_on_startup=False) 
 @app.schedule(schedule="0 0 * * * *", arg_name="mytimer", run_on_startup=False) 
 def censys_logbook_sync(mytimer: func.TimerRequest) -> None:
-
+    '''
     client = get_keyvault_client_quiet()
 
     next_event_raw_value = get_secret_quiet(client, 'CENSYS-LOGBOOK-NEXT-EVENT', 1)
@@ -100,7 +98,9 @@ def censys_logbook_sync(mytimer: func.TimerRequest) -> None:
 
     logging.info('Processed {} Logbook events, next event will be logbook ID: {}'.format(total_count, next_event_id))
     return
-
+    '''
+    logging.info("Not implemented yet")
+    
 
 @app.function_name(name="CensysRisksSync")
 @app.schedule(schedule="0 0 * * * *", arg_name="mytimer", run_on_startup=False) 
@@ -108,7 +108,7 @@ def censys_risks_sync(mytimer: func.TimerRequest) -> None:
 
     logging.info("Not implemented yet")
 
-
+'''
 def get_keyvault_client_quiet():
     keyVaultName = os.environ.get("KEYVAULT_NAME")
     KVUri = f"https://{keyVaultName}.vault.azure.net"
@@ -195,3 +195,4 @@ def build_request(workspace_id, shared_key, body, log_type):
     }
 
     return {"url": url, "headers": headers, "data": body}
+'''
