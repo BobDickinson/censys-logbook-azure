@@ -51,7 +51,7 @@ Option 1: Deploy using the Azure Resource Manager (ARM) Template
   The officialy support integrations hide this URL complexity behind a shortened (and branded) aka.ms link, like:
   https://aka.ms/censys-sentinel (Microsoft should be able to provide guidance on that once we're in their developer program).
 -->
-[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FBobDickinson%2Fcensys-logbook-azure%2Fmain%2Fazuredeploy.json) 
+[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FBobDickinson%2Fcensys-sentinel-sync%2Fmain%2Fazuredeploy.json) 
 
 2. Select the preferred **Subscription**, **Resource Group** and **Location**. 
 3. Enter the following parameters: 

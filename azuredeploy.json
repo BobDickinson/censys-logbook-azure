@@ -173,7 +173,7 @@
                         "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
                         "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(parameters('FunctionName')),';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('FunctionName'))), '2022-09-01').keys[0].value, ';EndpointSuffix=',toLower(variables('StorageSuffix')))]",
                         "WEBSITE_CONTENTSHARE": "[toLower(parameters('FunctionName'))]",
-                        "WEBSITE_RUN_FROM_PACKAGE": "https://github.com/BobDickinson/censys-logbook-azure/raw/main/dist/censys-sentinel.zip",
+                        "WEBSITE_RUN_FROM_PACKAGE": "https://github.com/BobDickinson/censys-sentinel-sync/raw/main/dist/censys-sentinel.zip",
                         "CENSYS_ASM_API_KEY": "[variables('censys_asm_api_key_referance')]",
                         "AZURE_LOG_ANALYTICS_WORKSPACE_ID": "[variables('logspace_workspace_id_referance')]",
                         "AZURE_LOG_ANALYTICS_SHARED_KEY": "[variables('logspace_workspace_shared_key_referance')]",
