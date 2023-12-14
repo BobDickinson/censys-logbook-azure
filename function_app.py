@@ -9,7 +9,7 @@ import hmac
 import base64
 import azure.functions as func
 
-#import requests
+import requests
 
 # Censys ASM deps
 from censys.asm import Logbook

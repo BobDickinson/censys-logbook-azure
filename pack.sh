@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 # Package appropriate Azure function files for distribution (APM install via WEBSITE_RUN_FROM_PACKAGE)
 
@@ -8,6 +8,13 @@ tmpdir=$(mktemp -d -t ci-XXXXXXXXXX)
 # Use rsync to copy all files and directories to the temporary directory,
 # while respecting .funcignore
 rsync -av --prune-empty-dirs --exclude-from=.funcignore ./ $tmpdir/
+
+python3 -m venv env
+source env/bin/activate
+
+pip install  --target="$tmpdir/.python_packages/lib/site-packages" -r requirements.txt
+
+deactivate
 
 # Create the dist directory if it doesn't exist
 mkdir -p ./dist
