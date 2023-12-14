@@ -1,4 +1,4 @@
-# Censys Logbook Integration with Azure Monitor
+# Censys Logbook Integration with Azure Monitor (for Developers)
 
 This integration polls the Censys Logbook for new events and injects them into Azure Monitor via the Azure Monitor Data Collector HTTP endpoint. It is implemented as an Azure Function with a timer trigger. It is implemented in Python and uses the Censys Python SDK as well as Azure Python libraries.  For more details, see:
 
