@@ -25,9 +25,9 @@ from azure.keyvault.secrets import SecretClient
 import azure.core
 import cffi
 import cryptography
-#import portalocker
+import portalocker
 #import pycparser
-#import jwt
+import jwt
 
 # Censys ASM deps
 from censys.asm import Logbook
