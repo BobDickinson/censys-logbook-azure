@@ -27,7 +27,7 @@ from censys.asm import Logbook
 app = func.FunctionApp()
 
 @app.function_name(name="CensysLogbookSync")
-@app.schedule(schedule="0 0 * * * *", arg_name="mytimer", run_on_startup=False) 
+@app.schedule(schedule="%CENSYS_LOGBOOK_SYNC_INTERVAL%", arg_name="mytimer", run_on_startup=False) 
 def censys_logbook_sync(mytimer: func.TimerRequest) -> None:
     client = get_keyvault_client_quiet()
 
@@ -180,7 +180,7 @@ def build_request(workspace_id, shared_key, body, log_type):
     method = 'POST'
     content_type = 'application/json'
     resource = '/api/logs'
-    rfc1123date = datetime.datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
+    rfc1123date = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
     content_length = len(body)
     signature = build_signature(workspace_id, shared_key, rfc1123date, content_length, method, content_type, resource)
     url = 'https://' + workspace_id + '.ods.opinsights.azure.com' + resource + '?api-version=2016-04-01'
