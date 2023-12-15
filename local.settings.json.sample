@@ -9,5 +9,6 @@
     "AZURE_LOG_ANALYTICS_SHARED_KEY": "<Your AZURE_LOG_ANALYTICS_SHARED_KEY>"
     "KEYVAULT_NAME": "<Your Azure Key Vault name>",
     "CENSYS_LOGBOOK_SYNC_INTERVAL": "0 0 * * * *",
+    "CENSYS_RISKS_SYNC_INTERVAL": "0 0 * * * *"
   }
 }

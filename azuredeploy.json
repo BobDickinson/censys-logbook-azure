@@ -178,6 +178,7 @@
                         "AZURE_LOG_ANALYTICS_WORKSPACE_ID": "[variables('logspace_workspace_id_referance')]",
                         "AZURE_LOG_ANALYTICS_SHARED_KEY": "[variables('logspace_workspace_shared_key_referance')]",
                         "CENSYS_LOGBOOK_SYNC_INTERVAL": "0 0 * * * *",
+                        "CENSYS_RISKS_SYNC_INTERVAL": "0 0 * * * *",
                         "KEYVAULT_NAME": "[parameters('KeyVaultName')]"
                     }
                 }

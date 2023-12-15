@@ -102,7 +102,7 @@ def censys_logbook_sync(mytimer: func.TimerRequest) -> None:
     
 
 @app.function_name(name="CensysRisksSync")
-@app.schedule(schedule="0 0 * * * *", arg_name="mytimer", run_on_startup=False) 
+@app.schedule(schedule="%CENSYS_RISKS_SYNC_INTERVAL%", arg_name="mytimer", run_on_startup=False) 
 def censys_risks_sync(mytimer: func.TimerRequest) -> None:
 
     logging.info("Not implemented yet")
