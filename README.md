@@ -12,8 +12,30 @@ The Censys connector allows you to easily send Censys Logbook and Risk events to
 
 **Summary of Logbook events by operation**
    ```kusto
-CensysLogbook_CL            
+Censys_Logbook_CL            
    | summarize Count=count() by Operation_s
+   ```
+
+**List all currently associated hosts**
+   ```kusto
+Censys_Logbook_CL
+   | summarize arg_max(Event_ID_d, *) by IP_Address_s
+   | where Operation_s == "ASSOCIATE"
+   ```
+
+**Summary of risk events by risk type**
+   ```kusto
+Censys_Risks_CL 
+   | summarize Count=count() by Risk_Type_s
+   ```
+
+**Summary of currently open risks by risk name**
+   ```kusto
+Censys_Risks_CL 
+   | summarize arg_max(Risk_Event_ID_d, *) by Risk_Instance_ID_d
+   | where Risk_Event_Operation_s != "close"
+   | summarize Count=count() by Display_Name_s
+   | order by Count desc
    ```
 
 ## Prerequisites
@@ -58,6 +80,8 @@ Option 1: Deploy using the Azure Resource Manager (ARM) Template
  >- Choose **KeyVaultName** and **FunctionName** for the new resources (both values must be globally unique)
  >- Enter the Censys ASM API key from Step 1: **CensysAsmApiKey**
  >- Enter the Workspace credentials from Step 2:  **AzureLogsAnalyticsWorkspaceId** and **AzureLogAnalyticsWorkspaceSharedKey**
+ >- Enter a value for **CensysLogbookStartAfter**. This will default to 0 to sync all Logbook events.  You can enter a different Logbook event ID or an RFC3339 formatted date to start the import at a later point.
+ >- Enter a value for **CensysRisksStartAfter**. This will default to 0 to sync all risk events.  You can enter a different risk event ID or an RFC3339 formatted date to start the import at a later point.
 4. Mark the checkbox labeled **I agree to the terms and conditions stated above**. 
 5. Click **Review+Create**, the once validated, click **Save** to deploy.
 

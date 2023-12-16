@@ -50,7 +50,9 @@ This integration is configured using environment variables. For local developmen
   
 In production, some of these environment variables will be populated from a Key Vault using an environment/configuration value formatted like: `"@Microsoft.KeyVault(SecretUri=https://[YourKeyVaultName].vault.azure.net/secrets/[NameOfSecretInVault])"` (without the square brackets).
 
-The Azure fuction relies on an Azure Key Vault for access to a Secret called "CENSYS-LOGBOOK-NEXT-EVENT". This is how we track the Censys cursor value between function runs (so we can pick up where we left off on subsequent runs).  While all other configuration variables may be accessed from the Key Vault indirectly (via redirected environment vars), this one value will be accessed directly from the Key Vault (since it is both read and written to).  The Azure Key Vault name must be provided to the function via the KEYVAULT_NAME environment variable, and both your development environment (if desired) and Function App must have read and update privileges on Secrets in that Key Vault.
+The Azure fuctions rely on an Azure Key Vault for access to Secrets called "CensysLogbookStartAfter" and "CensysRisksStartAfter". This is how we track the Censys cursor value between function runs (so we can pick up where we left off on subsequent runs).  While all other configuration variables may be accessed from the Key Vault indirectly (via redirected environment vars), these values will be accessed directly from the Key Vault (since they are both read and written to).  The Azure Key Vault name must be provided to the function via the KEYVAULT_NAME environment variable, and both your development environment (if desired) and Function App must have read and update privileges on Secrets in that Key Vault.
+
+For initial configuration, these values can contain be either a number indicating the previous event ID processed (0 to start at the beginning of the respective log), or an RFC3339 formatted date to beging processing from that timestamp.  Once the function starts, it will store the last processed event ID in these values.
 
 For the Azure Log Analytics Workspace ID and Shared Key, in the Azure console go to Log Analytics Workspaces, select a workspace, select 'Agents', then click 'Log Analytics agent instructions'.  For the shared key, you may use either the primary or secondary key.
 
@@ -61,8 +63,10 @@ For the Azure Log Analytics Workspace ID and Shared Key, in the Azure console go
 | AZURE_LOG_ANALYTICS_SHARED_KEY | Yes | Azure Log Analytics agent shared key |
 | KEYVAULT_NAME | Yes | Name of the Azure Keyvault used by this Azure Function |
 | CENSYS_LOGBOOK_SYNC_INTERVAL | Yes | Chron expression for the CensysLogbookSync timer trigger, see [NCHRONTAB expressions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-timer?tabs=python-v2%2Cisolated-process%2Cnodejs-v4&pivots=programming-language-python#ncrontab-expressions) |
-| AZURE_LOG_ANALYTICS_LOG_TYPE | No | Name of custom log file, defaults to "Censys_Logbook_CL" |
+| CENSYS_RISKS_SYNC_INTERVAL | Yes | Chron expression for the CensysLogbookSync timer trigger, see [NCHRONTAB expressions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-timer?tabs=python-v2%2Cisolated-process%2Cnodejs-v4&pivots=programming-language-python#ncrontab-expressions) |
+| AZURE_LOG_ANALYTICS_LOG_TYPE_CENSYS_LOGBOOK | No | Name of custom log file for logbook events, defaults to "Censys_Logbook_CL" |
+| AZURE_LOG_ANALYTICS_LOG_TYPE_CENSYS_RISKS | No | Name of custom log file for risk events, defaults to "Censys_Risks_CL" |
 | AZURE_EVENT_POST_LIMIT | No | The maximum number of Logbook events to push to Azure at one time, defaults to 500 |
-
+| CENSYS_RISK_EVENTS_LIMIT | No | The page size of risk events for processing, defaults to 500 |
 ## Disclaimer
 Please be aware that the availability and functionality of these community-supported integrations can change over time. They might not always be up-to-date with the latest versions of our products. Additionally, Censys reserves the right to remove or modify any integration that violates our guidelines or terms of use.

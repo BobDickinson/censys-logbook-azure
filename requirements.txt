@@ -8,7 +8,7 @@ azure-functions==1.17.0
 azure-identity==1.15.0
 azure-keyvault-secrets==4.7.0
 backoff==2.2.1
-censys==2.2.9
+censys==2.2.10
 certifi==2023.11.17
 cffi==1.16.0
 charset-normalizer==3.3.2
