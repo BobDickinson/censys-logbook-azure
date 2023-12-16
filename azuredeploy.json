@@ -7,16 +7,16 @@
     },
     "parameters": {
         "KeyVaultName": {
-            "defaultValue": "Censys-SentinelVault",
             "type": "string",
+            "defaultValue": "Censys-SentinelVault",
             "maxLength": 24,
             "metadata": {
                 "description": "Specifies The KeyVault name that stores all the integration credentials (must be globally unique)"
             }
         },
         "FunctionName": {
-            "defaultValue": "CensysToSentinel",
             "type": "string",
+            "defaultValue": "CensysToSentinel",
             "maxLength": 60,
             "metadata": {
                 "description": "Specifies The Function App name that executes the integration flow (must be globally unique)."
@@ -42,16 +42,16 @@
         },
         "CensysLogbookStartAfter": {
             "type": "string",
+            "defaultValue": "0",
             "metadata": {
-                "description": "A logbook event ID or an RFC 3339 formatted data to start importing from. Use default value of 0 to sync all events.",
-                "defaultValue": "0"
+                "description": "A logbook event ID or an RFC 3339 formatted data to start importing from. Use default value of 0 to sync all events."
             }
         },
         "CensysRisksStartAfter": {
             "type": "string",
+            "defaultValue": "0",
             "metadata": {
-                "description": "A risk event ID or an RFC 3339 formatted data to start importing from. Use default value of 0 to sync all events.",
-                "defaultValue": "0"
+                "description": "A risk event ID or an RFC 3339 formatted data to start importing from. Use default value of 0 to sync all events."
             }
         }
     },
