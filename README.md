@@ -4,7 +4,7 @@ The Censys connector allows you to easily send Censys Logbook and Risk events to
 
 | Connector attribute | Description |
 | --- | --- |
-| **Log Analytics table(s)** | CensysLogbook_CL<br/> CensysRisks_CL |
+| **Log Analytics table(s)** | Censys_Logbook_CL<br/> Censys_Risks_CL |
 | **Data collection rules support** | Not currently supported |
 | **Supported by** | [Censys](https://www.censys.com/) |
 
